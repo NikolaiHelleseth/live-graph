@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="temperature-plot" style="height: 300px;"></div>
+    <div id="turbiditet-plot" style="height: 300px;"></div>
+    <div id="ph-plot" style="height: 300px;"></div>
+    <div id="trykk-plot" style="height: 300px;"></div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+    <script>
+        $(document).ready(function() {
+            var plots = ['temperature', 'turbiditet', 'ph', 'trykk'];
+
+            var xVals = {};
+            var sensorData = {};
+
+            plots.forEach(function(plot) {
+                xVals[plot] = [];
+                sensorData[plot] = [];
+            });
+
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('plot_data', function(data) {
+                plots.forEach(function(plot) {
+                    xVals[plot] = data['x_val'];
+                    sensorData[plot] = data[plot];
+
+                    // Plotly chart update
+                    var plotDiv = document.getElementById(plot + '-plot');
+                    Plotly.newPlot(plotDiv, [{
+                        x: xVals[plot],
+                        y: sensorData[plot],
+                        type: 'line'
+                    }], {
+                        title: 'Real-time ' + plot.charAt(0).toUpperCase() + plot.slice(1) + ' graph',
+                        xaxis: {
+                            title: 'tid'
+                        }, 
+                        yaxis: {
+                            title: "antall"
+                        },
+                    });
+                });
+            });
+
+            function updateCharts() {
+                socket.emit('get_plot_data');
+            }
+
+            // Call updateCharts every second
+            setInterval(updateCharts, 1000);
+        });
+    </script>
+{% endblock %}

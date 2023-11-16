@@ -1,0 +1,7 @@
+.main_val {  
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    overflow-x: hidden;
+  }

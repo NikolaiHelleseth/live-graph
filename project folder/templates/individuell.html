@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div id="plot" style="height: 300px;"></div>
+<div class="main_val">
+    <div>
+        <h3><b>
+            gjennomsnitt
+        </b></h3>
+        <p id="mean"></p>
+    </div>
+    <div>
+        <h3><b>
+            median
+        </b></h3>
+        <p id="median"></p>
+    </div>
+</div>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/individuelle_sensor.css') }}">
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.socket.io/4.1.1/socket.io.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+var xVals = [];
+var sensorData = [];
+var plotDiv = document.getElementById('plot');
+var meanElement = document.getElementById("mean");
+var medianElement = document.getElementById("median")
+
+// sjekker om den eksisterer frå før 
+if (plotDiv) {
+    
+    var plot = Plotly.newPlot(plotDiv, [{
+        x: xVals,
+        y: sensorData,
+        type: 'line'
+    }], {
+        title: 'Real-time {{ header }} graph',
+        xaxis: {
+            title: 'Time'
+        },
+        yaxis: {
+            title: "{{ header }}"
+        },
+    });
+} else {
+    console.error("DOM element with ID 'plot' not found.");
+}
+
+
+var socket = io.connect('http://' + document.domain + ':' + location.port);
+socket.on('plot_data', function (data) {
+        xVals = data['x_val'];
+        sensorData = data['{{ header }}'];
+
+        
+        Plotly.update(plotDiv, { x: [xVals], y: [sensorData] });
+
+        var meanValue = Mean(sensorData).toFixed(2);
+        var medianValue = Median(sensorData);
+
+        meanElement.innerText = meanValue;
+        medianElement.innerText = medianValue;
+    });
+function updateCharts() {
+    socket.emit('get_plot_data');
+    
+ 
+
+    // ny oppdatering 
+    setTimeout(updateCharts, 1000);
+}
+
+
+updateCharts();
+
+function Mean(data) {
+var sum = data.reduce(function (acc, val) {
+return acc + val;
+}, 0);
+return sum / data.length;
+}
+
+
+function Median(data) {
+var sortedData = data.slice().sort(function (a, b) {
+    return a - b;
+});
+var middle = Math.floor(sortedData.length / 2);
+if (sortedData.length % 2 === 0) {
+    return (sortedData[middle - 1] + sortedData[middle]) / 2;
+} 
+else {
+    return sortedData[middle];
+}
+}
+</script>
+{% endblock %}

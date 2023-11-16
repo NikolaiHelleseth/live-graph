@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Sensor Plots</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+ 
+
+
+
+
+</head>
+<body>
+<header>
+    <div class="bar">
+        <a href="/" id="heimeside-knapp">Fish Friend</a>
+        <a href="/about">om oss</a>
+    
+        <div class="dropdown">
+            <button class="dropp-ned">Kategorier</button>
+            <div class="dropdown-content">
+            <a href="/">Heimeside</a>
+            <a href="/about">om oss</a>
+            
+
+            </div>
+        </div>     
+      </div>
+</header>
+<div class="row">
+
+    <div class="side">
+        <div id="side-meny-scroll">
+            <h2 >Velg Sensor:</h2>
+            <hr><br>
+        <div class="side-meny-scroll-innhald">
+            {% for sensor in sensorer %}
+            <a href="/sensor/{{ sensor }}">{{ sensor }}</a>
+            {% endfor %}
+        </div>  
+        </div>
+    </div>
+    <div class="main">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+<footer>
+<ul>
+    <li class="footer-logo footer-punkt"> Fish Friend AS&nbsp;</li>
+    <li class="footer-opplysninger footer-punkt">Adresse: Gløshaugen </li>
+    <li class="footer-punkt"><a href="">Personvern vilkår</a></li>
+    
+</ul>
+<p>Fish Friend&copy; 2023</p>
+</footer>
+
+</body>
+</html>
